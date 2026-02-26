@@ -1,5 +1,5 @@
 // Service Worker for French Flashcards PWA
-const CACHE_NAME = 'french-flashcards-v1';
+const CACHE_NAME = 'french-flashcards-v2';
 
 // Core assets to cache immediately
 const CORE_ASSETS = [
@@ -48,46 +48,58 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Return cached version
-        return cachedResponse;
-      }
+  // Core assets (HTML, CSS, JS, JSON) use network-first so updates deploy immediately
+  const isCore = request.destination === 'document' ||
+                 url.pathname.endsWith('.css') ||
+                 url.pathname.endsWith('.js') ||
+                 url.pathname.endsWith('.json');
 
-      // Not in cache - fetch from network
-      return fetch(request).then((networkResponse) => {
-        // Don't cache non-successful responses
-        if (!networkResponse || networkResponse.status !== 200) {
-          return networkResponse;
-        }
-
-        // Clone the response before caching
-        const responseToCache = networkResponse.clone();
-
-        // Cache audio files and other assets
-        if (request.url.includes('/audio/') ||
-            request.url.endsWith('.mp3') ||
-            request.url.endsWith('.css') ||
-            request.url.endsWith('.js') ||
-            request.url.endsWith('.html') ||
-            request.url.endsWith('.png') ||
-            request.url.endsWith('.json')) {
+  if (isCore) {
+    // Network-first for core assets
+    event.respondWith(
+      fetch(request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(request, responseToCache);
           });
         }
-
         return networkResponse;
       }).catch(() => {
-        // Network failed, return offline fallback if available
-        if (request.destination === 'document') {
-          return caches.match('/index.html');
+        return caches.match(request).then((cachedResponse) => {
+          return cachedResponse || new Response('Offline', { status: 503 });
+        });
+      })
+    );
+  } else {
+    // Cache-first for audio, images, and other static assets
+    event.respondWith(
+      caches.match(request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
         }
-        return new Response('Offline', { status: 503 });
-      });
-    })
-  );
+
+        return fetch(request).then((networkResponse) => {
+          if (!networkResponse || networkResponse.status !== 200) {
+            return networkResponse;
+          }
+
+          const responseToCache = networkResponse.clone();
+          if (request.url.includes('/audio/') ||
+              request.url.endsWith('.mp3') ||
+              request.url.endsWith('.png')) {
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+
+          return networkResponse;
+        }).catch(() => {
+          return new Response('Offline', { status: 503 });
+        });
+      })
+    );
+  }
 });
 
 // Handle messages from the main app

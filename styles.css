@@ -143,7 +143,7 @@ body::before {
     background-repeat: repeat;
     background-size: 256px 256px;
     pointer-events: none;
-    z-index: 9999;
+    z-index: 2;
 }
 
 /* Ambient gradient background */
@@ -1624,5 +1624,16 @@ header {
 }
 
 .card {
-    animation: slideUp 0.5s ease-out;
+    animation: cardReveal 0.5s ease-out;
+}
+
+@keyframes cardReveal {
+    from {
+        opacity: 0;
+        transform: translateX(4px) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(4px) translateY(0);
+    }
 }
