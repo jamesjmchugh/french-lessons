@@ -34,6 +34,28 @@ class FlashcardApp {
         this.updateStats();
         this.updateCardTypeCounts();
         this.showNextCard();
+        this.checkMagicLink();
+    }
+
+    async checkMagicLink() {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('magic');
+        if (!token) return;
+
+        // Strip the magic param from the URL
+        history.replaceState(null, '', window.location.pathname);
+
+        try {
+            await this.sync.verifyMagicLink(token);
+            this.updateAuthUI();
+        } catch (err) {
+            // Show error in the auth modal
+            const modal = document.getElementById('auth-modal');
+            const errorEl = document.getElementById('auth-error');
+            errorEl.textContent = err.message;
+            errorEl.classList.remove('hidden');
+            modal.classList.remove('hidden');
+        }
     }
 
     // Theme handling
@@ -1162,12 +1184,23 @@ class FlashcardApp {
         const modal = document.getElementById('auth-modal');
         const title = document.getElementById('auth-modal-title');
         const submitBtn = document.getElementById('auth-submit');
-        const switchLink = document.getElementById('auth-switch');
         const toggleText = document.getElementById('auth-toggle');
         const errorEl = document.getElementById('auth-error');
         const form = document.getElementById('auth-form');
         const passwordInput = document.getElementById('auth-password');
+        const magicForm = document.getElementById('magic-link-form');
+        const magicSent = document.getElementById('magic-link-sent');
+        const magicSendBtn = document.getElementById('magic-send-btn');
+        const magicEmailInput = document.getElementById('magic-email');
         let isRegisterMode = false;
+
+        const resetModalState = () => {
+            form.classList.remove('hidden');
+            magicForm.classList.remove('hidden');
+            magicSent.classList.add('hidden');
+            document.querySelector('.auth-divider').classList.remove('hidden');
+            toggleText.classList.remove('hidden');
+        };
 
         const openModal = (registerMode) => {
             isRegisterMode = registerMode;
@@ -1181,6 +1214,10 @@ class FlashcardApp {
             errorEl.textContent = '';
             document.getElementById('auth-email').value = '';
             document.getElementById('auth-password').value = '';
+            magicEmailInput.value = '';
+            magicSendBtn.disabled = false;
+            magicSendBtn.textContent = 'Send magic link';
+            resetModalState();
             modal.classList.remove('hidden');
 
             // Rebind switch link
@@ -1223,6 +1260,37 @@ class FlashcardApp {
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = isRegisterMode ? 'Register' : 'Log In';
+            }
+        });
+
+        // Magic link send
+        magicSendBtn.addEventListener('click', async () => {
+            const email = magicEmailInput.value.trim();
+            if (!email) {
+                errorEl.textContent = 'Please enter your email address';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            errorEl.classList.add('hidden');
+            magicSendBtn.disabled = true;
+            magicSendBtn.textContent = 'Sending...';
+
+            try {
+                await this.sync.sendMagicLink(email);
+                // Show success state
+                form.classList.add('hidden');
+                magicForm.classList.add('hidden');
+                document.querySelector('.auth-divider').classList.add('hidden');
+                toggleText.classList.add('hidden');
+                document.getElementById('magic-email-display').textContent = email;
+                magicSent.classList.remove('hidden');
+                title.textContent = '';
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.classList.remove('hidden');
+                magicSendBtn.disabled = false;
+                magicSendBtn.textContent = 'Send magic link';
             }
         });
 

@@ -54,6 +54,32 @@ class SyncManager {
         return data;
     }
 
+    async sendMagicLink(email) {
+        const res = await fetch(`${this.apiBase}/magic-send.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        return data;
+    }
+
+    async verifyMagicLink(token) {
+        const res = await fetch(`${this.apiBase}/magic-verify.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token })
+        });
+        const data = await res.json();
+        if (!data.success) {
+            throw new Error(data.error || 'Invalid or expired link');
+        }
+        this.token = data.token;
+        localStorage.setItem('frenchSync_token', this.token);
+        await this.sync();
+        return data;
+    }
+
     async logout() {
         if (this.token) {
             try {

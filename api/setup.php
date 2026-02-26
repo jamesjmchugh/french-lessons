@@ -26,6 +26,21 @@ try {
         INDEX idx_expires (expires_at)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+    // Magic links table
+    $pdo->exec("CREATE TABLE IF NOT EXISTS magic_links (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        token VARCHAR(64) NOT NULL UNIQUE,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        expires_at DATETIME NOT NULL,
+        used TINYINT(1) NOT NULL DEFAULT 0,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_magic_token (token)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    // Allow passwordless users (magic link only)
+    $pdo->exec("ALTER TABLE users MODIFY password_hash VARCHAR(255) DEFAULT NULL");
+
     // Progress table
     $pdo->exec("CREATE TABLE IF NOT EXISTS progress (
         user_id INT NOT NULL,

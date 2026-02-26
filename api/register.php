@@ -28,7 +28,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-if (strlen($password) < 6) {
+if ($password !== '' && strlen($password) < 6) {
     http_response_code(400);
     echo json_encode(['success' => false, 'error' => 'Password must be at least 6 characters']);
     exit;
@@ -48,7 +48,7 @@ try {
     }
 
     // Create user
-    $hash = password_hash($password, PASSWORD_DEFAULT);
+    $hash = $password !== '' ? password_hash($password, PASSWORD_DEFAULT) : null;
     $stmt = $pdo->prepare('INSERT INTO users (email, password_hash) VALUES (?, ?)');
     $stmt->execute([$email, $hash]);
     $userId = $pdo->lastInsertId();

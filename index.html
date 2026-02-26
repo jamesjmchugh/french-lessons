@@ -328,6 +328,21 @@
                 <p id="auth-error" class="auth-error hidden"></p>
                 <button type="submit" id="auth-submit" class="btn btn-primary">Log In</button>
             </form>
+            <div class="auth-divider"><span>or</span></div>
+            <div id="magic-link-form" class="magic-link-form">
+                <input type="email" id="magic-email" placeholder="Email" autocomplete="email">
+                <button type="button" id="magic-send-btn" class="btn btn-secondary magic-send-btn">Send magic link</button>
+            </div>
+            <div id="magic-link-sent" class="magic-link-sent hidden">
+                <div class="magic-link-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </div>
+                <p class="magic-link-title">Check your email</p>
+                <p class="magic-link-desc">We sent a login link to <strong id="magic-email-display"></strong></p>
+            </div>
             <p id="auth-toggle" class="auth-toggle">Don't have an account? <a href="#" id="auth-switch">Register</a></p>
             <button id="auth-close" class="btn btn-secondary auth-close">Cancel</button>
         </div>
