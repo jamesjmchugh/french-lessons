@@ -15,7 +15,8 @@ class FlashcardApp {
             includeSentences: true,
             includeVerbs: true,
             theme: 'dark',
-            studyMode: 'all'
+            studyMode: 'all',
+            lessonFilter: 'all'
         };
 
         this.init();
@@ -104,7 +105,43 @@ class FlashcardApp {
             };
         });
 
+        this.populateLessonDropdown();
         this.updateDueCards();
+    }
+
+    // Populate lesson filter dropdown from card data
+    populateLessonDropdown() {
+        const select = document.getElementById('lesson-filter');
+        if (!select) return;
+
+        const lessons = [...new Set(this.cards.map(c => c.lesson).filter(Boolean))];
+
+        // Sort: grammar topics first (no date), then dates chronologically
+        const datePattern = /^(\d{1,2}) (\w+) (\d{4})$/;
+        const monthOrder = { 'Nov': 11, 'Dec': 12, 'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4 };
+
+        lessons.sort((a, b) => {
+            const aMatch = a.match(datePattern);
+            const bMatch = b.match(datePattern);
+            if (!aMatch && !bMatch) return a.localeCompare(b);
+            if (!aMatch) return -1;
+            if (!bMatch) return 1;
+            const aDate = new Date(parseInt(aMatch[3]), (monthOrder[aMatch[2]] || 0) - 1, parseInt(aMatch[1]));
+            const bDate = new Date(parseInt(bMatch[3]), (monthOrder[bMatch[2]] || 0) - 1, parseInt(bMatch[1]));
+            return aDate - bDate;
+        });
+
+        // Keep "All Lessons" option, add the rest
+        select.innerHTML = '<option value="all">All Lessons</option>';
+        lessons.forEach(lesson => {
+            const count = this.cards.filter(c => c.lesson === lesson).length;
+            const option = document.createElement('option');
+            option.value = lesson;
+            option.textContent = `${lesson} (${count})`;
+            select.appendChild(option);
+        });
+
+        select.value = this.settings.lessonFilter;
     }
 
     // Get cards that are due for review with priority for important verbs
@@ -131,6 +168,11 @@ class FlashcardApp {
             if ((card.type === 'verb' || card.type === 'conjugation') && !this.settings.includeVerbs) return false;
             return true;
         });
+
+        // Apply lesson filter
+        if (this.settings.lessonFilter !== 'all') {
+            filtered = filtered.filter(card => card.lesson === this.settings.lessonFilter);
+        }
 
         let dueCards = filtered.filter(card => card.dueDate <= now);
 
@@ -766,6 +808,11 @@ class FlashcardApp {
             return true;
         });
 
+        // Apply lesson filter
+        if (this.settings.lessonFilter !== 'all') {
+            filtered = filtered.filter(card => card.lesson === this.settings.lessonFilter);
+        }
+
         const dueCount = filtered.filter(c => c.dueDate <= now).length;
         const learnedCount = filtered.filter(c => c.repetitions >= 3).length;
         const totalCount = filtered.length;
@@ -804,6 +851,11 @@ class FlashcardApp {
             } else {
                 filtered = filtered.filter(c => c.type === filter);
             }
+        }
+
+        // Filter by lesson
+        if (this.settings.lessonFilter !== 'all') {
+            filtered = filtered.filter(c => c.lesson === this.settings.lessonFilter);
         }
 
         // Filter by search
@@ -952,6 +1004,18 @@ class FlashcardApp {
             this.settings.studyMode = e.target.value;
             this.saveSettings();
             this.recentVerbs = []; // Clear history when changing modes
+            this.updateDueCards();
+            this.updateStats();
+            this.showNextCard();
+        });
+
+        // Lesson filter selector
+        const lessonFilterSelect = document.getElementById('lesson-filter');
+        lessonFilterSelect.value = this.settings.lessonFilter;
+        lessonFilterSelect.addEventListener('change', (e) => {
+            this.settings.lessonFilter = e.target.value;
+            this.saveSettings();
+            this.recentVerbs = [];
             this.updateDueCards();
             this.updateStats();
             this.showNextCard();
