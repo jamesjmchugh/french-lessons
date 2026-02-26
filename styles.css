@@ -385,38 +385,6 @@ header {
     text-align: center;
 }
 
-.modal-content form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.modal-content input[type="email"],
-.modal-content input[type="password"] {
-    width: 100%;
-    padding: 14px 16px;
-    background: var(--bg-input);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-family: var(--font-body);
-    font-size: 0.9375rem;
-    transition: all var(--transition-fast);
-    box-sizing: border-box;
-}
-
-.modal-content input[type="email"]::placeholder,
-.modal-content input[type="password"]::placeholder {
-    color: var(--text-muted);
-}
-
-.modal-content input[type="email"]:focus,
-.modal-content input[type="password"]:focus {
-    outline: none;
-    border-color: var(--rouge);
-    box-shadow: 0 0 0 3px var(--rouge-subtle);
-}
-
 .auth-error {
     color: var(--danger);
     font-size: 0.8125rem;
@@ -428,55 +396,9 @@ header {
     border-radius: var(--radius-sm);
 }
 
-.modal-content .btn-primary {
-    width: 100%;
-    margin-top: 4px;
-}
-
-.auth-toggle {
-    text-align: center;
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    margin: 16px 0 0;
-    font-family: var(--font-body);
-}
-
-.auth-toggle a {
-    color: var(--rouge);
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.auth-toggle a:hover {
-    text-decoration: underline;
-}
-
 .auth-close {
     width: 100%;
     margin-top: 12px;
-}
-
-/* Auth Divider */
-.auth-divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 16px 0;
-}
-
-.auth-divider::before,
-.auth-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border-default);
-}
-
-.auth-divider span {
-    font-family: var(--font-body);
-    font-size: 0.8125rem;
-    color: var(--text-muted);
-    text-transform: lowercase;
 }
 
 /* Magic Link Form */
@@ -511,6 +433,7 @@ header {
 
 .magic-send-btn {
     width: 100%;
+    margin-top: 4px;
 }
 
 /* Magic Link Sent (Check Email) */

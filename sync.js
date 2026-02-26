@@ -20,40 +20,6 @@ class SyncManager {
         return !!this.token;
     }
 
-    async register(email, password) {
-        const res = await fetch(`${this.apiBase}/register.php`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        if (!data.success) {
-            throw new Error(data.error || 'Registration failed');
-        }
-        this.token = data.token;
-        localStorage.setItem('frenchSync_token', this.token);
-        // Full sync after registration
-        await this.sync();
-        return data;
-    }
-
-    async login(email, password) {
-        const res = await fetch(`${this.apiBase}/login.php`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        if (!data.success) {
-            throw new Error(data.error || 'Login failed');
-        }
-        this.token = data.token;
-        localStorage.setItem('frenchSync_token', this.token);
-        // Full sync after login
-        await this.sync();
-        return data;
-    }
-
     async sendMagicLink(email) {
         const res = await fetch(`${this.apiBase}/magic-send.php`, {
             method: 'POST',

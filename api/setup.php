@@ -10,7 +10,6 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
         email VARCHAR(255) NOT NULL UNIQUE,
-        password_hash VARCHAR(255) NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
@@ -37,9 +36,6 @@ try {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         INDEX idx_magic_token (token)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-    // Allow passwordless users (magic link only)
-    $pdo->exec("ALTER TABLE users MODIFY password_hash VARCHAR(255) DEFAULT NULL");
 
     // Progress table
     $pdo->exec("CREATE TABLE IF NOT EXISTS progress (

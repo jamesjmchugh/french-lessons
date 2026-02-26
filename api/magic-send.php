@@ -36,8 +36,8 @@ try {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user) {
-        // Auto-create account with no password
-        $stmt = $pdo->prepare('INSERT INTO users (email, password_hash) VALUES (?, NULL)');
+        // Auto-create account
+        $stmt = $pdo->prepare('INSERT INTO users (email) VALUES (?)');
         $stmt->execute([$email]);
         $userId = $pdo->lastInsertId();
     } else {

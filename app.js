@@ -1183,87 +1183,34 @@ class FlashcardApp {
     bindAuthEvents() {
         const modal = document.getElementById('auth-modal');
         const title = document.getElementById('auth-modal-title');
-        const submitBtn = document.getElementById('auth-submit');
-        const toggleText = document.getElementById('auth-toggle');
         const errorEl = document.getElementById('auth-error');
-        const form = document.getElementById('auth-form');
-        const passwordInput = document.getElementById('auth-password');
         const magicForm = document.getElementById('magic-link-form');
         const magicSent = document.getElementById('magic-link-sent');
         const magicSendBtn = document.getElementById('magic-send-btn');
         const magicEmailInput = document.getElementById('magic-email');
-        let isRegisterMode = false;
 
-        const resetModalState = () => {
-            form.classList.remove('hidden');
-            magicForm.classList.remove('hidden');
-            magicSent.classList.add('hidden');
-            document.querySelector('.auth-divider').classList.remove('hidden');
-            toggleText.classList.remove('hidden');
-        };
-
-        const openModal = (registerMode) => {
-            isRegisterMode = registerMode;
-            title.textContent = registerMode ? 'Register' : 'Log In';
-            submitBtn.textContent = registerMode ? 'Register' : 'Log In';
-            toggleText.innerHTML = registerMode
-                ? 'Already have an account? <a href="#" id="auth-switch">Log In</a>'
-                : 'Don\'t have an account? <a href="#" id="auth-switch">Register</a>';
-            passwordInput.autocomplete = registerMode ? 'new-password' : 'current-password';
+        const openModal = () => {
             errorEl.classList.add('hidden');
             errorEl.textContent = '';
-            document.getElementById('auth-email').value = '';
-            document.getElementById('auth-password').value = '';
             magicEmailInput.value = '';
             magicSendBtn.disabled = false;
-            magicSendBtn.textContent = 'Send magic link';
-            resetModalState();
+            magicSendBtn.textContent = 'Send login link';
+            magicForm.classList.remove('hidden');
+            magicSent.classList.add('hidden');
+            title.textContent = 'Log In';
             modal.classList.remove('hidden');
-
-            // Rebind switch link
-            document.getElementById('auth-switch').addEventListener('click', (e) => {
-                e.preventDefault();
-                openModal(!isRegisterMode);
-            });
         };
 
-        document.getElementById('login-btn').addEventListener('click', () => openModal(false));
+        document.getElementById('login-btn').addEventListener('click', openModal);
 
         document.getElementById('auth-close').addEventListener('click', () => {
             modal.classList.add('hidden');
         });
 
-        document.getElementById('auth-modal').querySelector('.modal-overlay').addEventListener('click', () => {
+        modal.querySelector('.modal-overlay').addEventListener('click', () => {
             modal.classList.add('hidden');
         });
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value;
-
-            errorEl.classList.add('hidden');
-            submitBtn.disabled = true;
-            submitBtn.textContent = isRegisterMode ? 'Registering...' : 'Logging in...';
-
-            try {
-                if (isRegisterMode) {
-                    await this.sync.register(email, password);
-                } else {
-                    await this.sync.login(email, password);
-                }
-                modal.classList.add('hidden');
-                this.updateAuthUI();
-            } catch (err) {
-                errorEl.textContent = err.message;
-                errorEl.classList.remove('hidden');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = isRegisterMode ? 'Register' : 'Log In';
-            }
-        });
-
-        // Magic link send
         magicSendBtn.addEventListener('click', async () => {
             const email = magicEmailInput.value.trim();
             if (!email) {
@@ -1278,11 +1225,7 @@ class FlashcardApp {
 
             try {
                 await this.sync.sendMagicLink(email);
-                // Show success state
-                form.classList.add('hidden');
                 magicForm.classList.add('hidden');
-                document.querySelector('.auth-divider').classList.add('hidden');
-                toggleText.classList.add('hidden');
                 document.getElementById('magic-email-display').textContent = email;
                 magicSent.classList.remove('hidden');
                 title.textContent = '';
@@ -1290,7 +1233,7 @@ class FlashcardApp {
                 errorEl.textContent = err.message;
                 errorEl.classList.remove('hidden');
                 magicSendBtn.disabled = false;
-                magicSendBtn.textContent = 'Send magic link';
+                magicSendBtn.textContent = 'Send login link';
             }
         });
 
