@@ -1,0 +1,13 @@
+# Environment variables (API keys)
+.env
+
+# macOS
+.DS_Store
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Node (if used later)
+node_modules/
