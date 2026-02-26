@@ -1,6 +1,9 @@
 # Environment variables (API keys)
 .env
 
+# Claude Code local settings (may contain permission rules with secrets)
+.claude/settings.local.json
+
 # macOS
 .DS_Store
 
