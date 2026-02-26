@@ -1,6 +1,9 @@
 # Environment variables (API keys)
 .env
 
+# Server database credentials
+api/config.php
+
 # Claude Code local settings (may contain permission rules with secrets)
 .claude/settings.local.json
 

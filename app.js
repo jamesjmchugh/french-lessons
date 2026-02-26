@@ -23,11 +23,14 @@ class FlashcardApp {
     }
 
     init() {
+        this.sync = new SyncManager();
         this.loadSettings();
         this.applyTheme();
         this.loadProgress();
         this.initializeCards();
         this.bindEvents();
+        this.bindAuthEvents();
+        this.updateAuthUI();
         this.updateStats();
         this.updateCardTypeCounts();
         this.showNextCard();
@@ -250,6 +253,11 @@ class FlashcardApp {
         this.updateStats();
         this.hideAnswer();
         this.showNextCard();
+
+        // Fire-and-forget sync if logged in
+        if (this.sync && this.sync.isLoggedIn()) {
+            this.sync.sync();
+        }
     }
 
     // Shuffle array using Fisher-Yates algorithm
@@ -1101,7 +1109,7 @@ class FlashcardApp {
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT') return;
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
 
             if (e.key === ' ' || e.key === 'Enter') {
                 e.preventDefault();
@@ -1129,6 +1137,98 @@ class FlashcardApp {
                     this.flipBack();
                 }
             }
+        });
+    }
+
+    // Auth UI
+    updateAuthUI() {
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const syncStatus = document.getElementById('sync-status');
+
+        if (this.sync.isLoggedIn()) {
+            loginBtn.classList.add('hidden');
+            logoutBtn.classList.remove('hidden');
+            syncStatus.classList.remove('hidden');
+            this.sync.setSyncStatus('synced');
+        } else {
+            loginBtn.classList.remove('hidden');
+            logoutBtn.classList.add('hidden');
+            syncStatus.classList.add('hidden');
+        }
+    }
+
+    bindAuthEvents() {
+        const modal = document.getElementById('auth-modal');
+        const title = document.getElementById('auth-modal-title');
+        const submitBtn = document.getElementById('auth-submit');
+        const switchLink = document.getElementById('auth-switch');
+        const toggleText = document.getElementById('auth-toggle');
+        const errorEl = document.getElementById('auth-error');
+        const form = document.getElementById('auth-form');
+        const passwordInput = document.getElementById('auth-password');
+        let isRegisterMode = false;
+
+        const openModal = (registerMode) => {
+            isRegisterMode = registerMode;
+            title.textContent = registerMode ? 'Register' : 'Log In';
+            submitBtn.textContent = registerMode ? 'Register' : 'Log In';
+            toggleText.innerHTML = registerMode
+                ? 'Already have an account? <a href="#" id="auth-switch">Log In</a>'
+                : 'Don\'t have an account? <a href="#" id="auth-switch">Register</a>';
+            passwordInput.autocomplete = registerMode ? 'new-password' : 'current-password';
+            errorEl.classList.add('hidden');
+            errorEl.textContent = '';
+            document.getElementById('auth-email').value = '';
+            document.getElementById('auth-password').value = '';
+            modal.classList.remove('hidden');
+
+            // Rebind switch link
+            document.getElementById('auth-switch').addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal(!isRegisterMode);
+            });
+        };
+
+        document.getElementById('login-btn').addEventListener('click', () => openModal(false));
+
+        document.getElementById('auth-close').addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        document.getElementById('auth-modal').querySelector('.modal-overlay').addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+
+            errorEl.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.textContent = isRegisterMode ? 'Registering...' : 'Logging in...';
+
+            try {
+                if (isRegisterMode) {
+                    await this.sync.register(email, password);
+                } else {
+                    await this.sync.login(email, password);
+                }
+                modal.classList.add('hidden');
+                this.updateAuthUI();
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = isRegisterMode ? 'Register' : 'Log In';
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await this.sync.logout();
+            this.updateAuthUI();
         });
     }
 }

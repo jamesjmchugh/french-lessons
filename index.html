@@ -36,22 +36,29 @@
                     </span>
                     <h1>français</h1>
                 </div>
-                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-                    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                </button>
+                <div class="header-actions">
+                    <div id="auth-area">
+                        <button id="login-btn" class="auth-btn">Log In</button>
+                        <span id="sync-status" class="sync-status hidden"></span>
+                        <button id="logout-btn" class="auth-btn hidden">Log Out</button>
+                    </div>
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div class="stats-container">
                 <div class="stat-card">
@@ -311,7 +318,23 @@
         </main>
     </div>
 
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <h3 id="auth-modal-title">Log In</h3>
+            <form id="auth-form" autocomplete="on">
+                <input type="email" id="auth-email" placeholder="Email" autocomplete="email" required>
+                <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password" required>
+                <p id="auth-error" class="auth-error hidden"></p>
+                <button type="submit" id="auth-submit" class="btn btn-primary">Log In</button>
+            </form>
+            <p id="auth-toggle" class="auth-toggle">Don't have an account? <a href="#" id="auth-switch">Register</a></p>
+            <button id="auth-close" class="btn btn-secondary auth-close">Cancel</button>
+        </div>
+    </div>
+
     <script src="data.js"></script>
+    <script src="sync.js"></script>
     <script src="app.js"></script>
 
     <!-- Service Worker Registration -->

@@ -1,11 +1,12 @@
 // Service Worker for French Flashcards PWA
-const CACHE_NAME = 'french-flashcards-v2';
+const CACHE_NAME = 'french-flashcards-v3';
 
 // Core assets to cache immediately
 const CORE_ASSETS = [
   '/',
   '/index.html',
   '/styles.css',
+  '/sync.js',
   '/app.js',
   '/data.js',
   '/manifest.json'
@@ -45,6 +46,12 @@ self.addEventListener('fetch', (event) => {
 
   // Only handle same-origin requests
   if (url.origin !== location.origin) {
+    return;
+  }
+
+  // API requests go straight to network (no caching)
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/french/api/')) {
+    event.respondWith(fetch(event.request));
     return;
   }
 
