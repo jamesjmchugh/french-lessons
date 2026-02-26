@@ -821,7 +821,7 @@ class FlashcardApp {
             const statusClass = isLearned ? 'learned' : '';
 
             return `
-                <div class="card-item">
+                <div class="card-item card-item-${card.type}">
                     <div class="card-item-content">
                         <div class="card-item-front">${card.french}</div>
                         <div class="card-item-back">${card.english}</div>
