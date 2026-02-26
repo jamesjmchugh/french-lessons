@@ -149,7 +149,7 @@ class FlashcardApp {
         const now = Date.now();
         const studyMode = this.settings.studyMode;
 
-        const filtered = this.cards.filter(card => {
+        let filtered = this.cards.filter(card => {
             // First apply study mode filter
             if (studyMode === 'critical') {
                 // Only show être, avoir, aller conjugations
@@ -789,7 +789,7 @@ class FlashcardApp {
         const now = Date.now();
         const studyMode = this.settings.studyMode;
 
-        const filtered = this.cards.filter(card => {
+        let filtered = this.cards.filter(card => {
             // Apply study mode filter
             if (studyMode === 'critical') {
                 return card.priority === true;
