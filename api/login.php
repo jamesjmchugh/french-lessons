@@ -44,7 +44,7 @@ try {
 
     // Create session token
     $token = bin2hex(random_bytes(32));
-    $expiresAt = date('Y-m-d H:i:s', strtotime('+30 days'));
+    $expiresAt = '9999-12-31 23:59:59';
     $stmt = $pdo->prepare('INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, ?)');
     $stmt->execute([$user['id'], $token, $expiresAt]);
 

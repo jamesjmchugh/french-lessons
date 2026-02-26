@@ -35,7 +35,7 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Validate session token and get user_id
-    $stmt = $pdo->prepare('SELECT user_id FROM sessions WHERE token = ? AND expires_at > NOW()');
+    $stmt = $pdo->prepare('SELECT user_id FROM sessions WHERE token = ?');
     $stmt->execute([$token]);
     $session = $stmt->fetch(PDO::FETCH_ASSOC);
 
