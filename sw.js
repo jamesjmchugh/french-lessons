@@ -1,15 +1,15 @@
 // Service Worker for French Flashcards PWA
-const CACHE_NAME = 'french-flashcards-v3';
+const CACHE_NAME = 'french-flashcards-v4';
 
 // Core assets to cache immediately
 const CORE_ASSETS = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/sync.js',
-  '/app.js',
-  '/data.js',
-  '/manifest.json'
+  './',
+  './index.html',
+  './styles.css',
+  './sync.js',
+  './app.js',
+  './data.js',
+  './manifest.json'
 ];
 
 // Install event - cache core assets
