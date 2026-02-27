@@ -33,6 +33,7 @@ class FlashcardApp {
         this.updateAuthUI();
         this.updateStats();
         this.updateCardTypeCounts();
+        this.loadStreak();
         this.showNextCard();
         this.checkMagicLink();
     }
@@ -126,7 +127,9 @@ class FlashcardApp {
                 easeFactor: saved?.easeFactor || 2.5,
                 repetitions: saved?.repetitions || 0,
                 dueDate: saved?.dueDate || Date.now(),
-                lastReview: saved?.lastReview || null
+                lastReview: saved?.lastReview || null,
+                timesShown: saved?.timesShown || 0,
+                lastRating: saved?.lastRating || 0
             };
         });
 
@@ -185,6 +188,8 @@ class FlashcardApp {
                 return card.type === 'sentence';
             } else if (studyMode === 'verbs') {
                 return card.type === 'verb' || card.type === 'conjugation';
+            } else if (studyMode === 'trouble') {
+                return card.lastRating === 1 || card.lastRating === 2;
             }
 
             // For 'all' mode, apply settings filters
@@ -273,6 +278,7 @@ class FlashcardApp {
         Object.assign(this.currentCard, updates);
 
         this.saveCardProgress(this.currentCard);
+        this.updateStreak();
         this.updateDueCards();
         this.updateStats();
         this.hideAnswer();
@@ -831,6 +837,8 @@ class FlashcardApp {
                 return card.type === 'sentence';
             } else if (studyMode === 'verbs') {
                 return card.type === 'verb' || card.type === 'conjugation';
+            } else if (studyMode === 'trouble') {
+                return card.lastRating === 1 || card.lastRating === 2;
             }
 
             // For 'all' mode
@@ -852,6 +860,46 @@ class FlashcardApp {
         document.getElementById('due-count').textContent = dueCount;
         document.getElementById('learned-count').textContent = learnedCount;
         document.getElementById('total-count').textContent = totalCount;
+    }
+
+    // Study streak tracking
+    loadStreak() {
+        try {
+            const data = JSON.parse(localStorage.getItem('frenchStreak') || '{}');
+            const today = new Date().toISOString().slice(0, 10);
+            const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+            if (data.lastStudyDate === today || data.lastStudyDate === yesterday) {
+                this.streak = data;
+            } else {
+                this.streak = { currentStreak: 0, lastStudyDate: null };
+            }
+        } catch (e) {
+            this.streak = { currentStreak: 0, lastStudyDate: null };
+        }
+
+        const el = document.getElementById('streak-count');
+        if (el) el.textContent = this.streak.currentStreak;
+    }
+
+    updateStreak() {
+        const today = new Date().toISOString().slice(0, 10);
+        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+        if (!this.streak) this.streak = { currentStreak: 0, lastStudyDate: null };
+
+        if (this.streak.lastStudyDate === today) return;
+
+        if (this.streak.lastStudyDate === yesterday) {
+            this.streak.currentStreak++;
+        } else {
+            this.streak.currentStreak = 1;
+        }
+        this.streak.lastStudyDate = today;
+
+        localStorage.setItem('frenchStreak', JSON.stringify(this.streak));
+        const el = document.getElementById('streak-count');
+        if (el) el.textContent = this.streak.currentStreak;
     }
 
     // Update card type counts in settings
@@ -904,11 +952,18 @@ class FlashcardApp {
             const statusText = isLearned ? 'Learned' : (card.dueDate <= now ? 'Due' : 'Review later');
             const statusClass = isLearned ? 'learned' : '';
 
+            const ratingNames = { 1: 'again', 2: 'hard', 3: 'good', 4: 'easy' };
+            const metaHtml = card.timesShown > 0 ? `
+                        <div class="card-item-meta">
+                            <span class="card-item-reviews">${card.timesShown} review${card.timesShown !== 1 ? 's' : ''}</span>
+                            <span class="rating-dot rating-${ratingNames[card.lastRating] || 'good'}"></span>
+                        </div>` : '';
+
             return `
                 <div class="card-item card-item-${card.type}">
                     <div class="card-item-content">
                         <div class="card-item-front">${card.french}</div>
-                        <div class="card-item-back">${card.english}</div>
+                        <div class="card-item-back">${card.english}</div>${metaHtml}
                     </div>
                     <span class="card-item-status ${statusClass}">${statusText}</span>
                 </div>
@@ -1213,6 +1268,13 @@ class FlashcardApp {
 
         modal.querySelector('.modal-overlay').addEventListener('click', () => {
             modal.classList.add('hidden');
+        });
+
+        magicEmailInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                magicSendBtn.click();
+            }
         });
 
         magicSendBtn.addEventListener('click', async () => {

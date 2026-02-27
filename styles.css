@@ -1395,6 +1395,34 @@ header {
     color: var(--success);
 }
 
+.card-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.card-item-reviews {
+    font-family: var(--font-body);
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+}
+
+.rating-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.rating-dot.rating-again { background: var(--color-again); }
+.rating-dot.rating-hard { background: var(--color-hard); }
+.rating-dot.rating-good { background: var(--color-good); }
+.rating-dot.rating-easy { background: var(--color-easy); }
+
+.stat-card:nth-child(4) .stat-value { color: var(--warning); }
+
 /* ============================================
    Settings View
    ============================================ */
