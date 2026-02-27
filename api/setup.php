@@ -46,6 +46,8 @@ try {
         repetitions INT NOT NULL DEFAULT 0,
         due_date BIGINT NOT NULL DEFAULT 0,
         last_review BIGINT DEFAULT NULL,
+        times_shown INT NOT NULL DEFAULT 0,
+        last_rating TINYINT NOT NULL DEFAULT 0,
         updated_at BIGINT NOT NULL DEFAULT 0,
         PRIMARY KEY (user_id, card_id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

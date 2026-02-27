@@ -51,7 +51,7 @@ try {
     $clientProgress = $input['progress'] ?? [];
 
     // Fetch all server progress for this user
-    $stmt = $pdo->prepare('SELECT card_id, `interval`, ease_factor, repetitions, due_date, last_review, updated_at FROM progress WHERE user_id = ?');
+    $stmt = $pdo->prepare('SELECT card_id, `interval`, ease_factor, repetitions, due_date, last_review, times_shown, last_rating, updated_at FROM progress WHERE user_id = ?');
     $stmt->execute([$userId]);
     $serverRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -62,14 +62,16 @@ try {
     }
 
     // Prepare upsert statement
-    $upsert = $pdo->prepare('INSERT INTO progress (user_id, card_id, `interval`, ease_factor, repetitions, due_date, last_review, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    $upsert = $pdo->prepare('INSERT INTO progress (user_id, card_id, `interval`, ease_factor, repetitions, due_date, last_review, times_shown, last_rating, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             `interval` = VALUES(`interval`),
             ease_factor = VALUES(ease_factor),
             repetitions = VALUES(repetitions),
             due_date = VALUES(due_date),
             last_review = VALUES(last_review),
+            times_shown = VALUES(times_shown),
+            last_rating = VALUES(last_rating),
             updated_at = VALUES(updated_at)');
 
     // Process client progress — client wins if its lastReview is newer
@@ -86,6 +88,8 @@ try {
                 intval($clientCard['repetitions'] ?? 0),
                 intval($clientCard['dueDate'] ?? 0),
                 $clientLastReview,
+                intval($clientCard['timesShown'] ?? 0),
+                intval($clientCard['lastRating'] ?? 0),
                 $clientLastReview
             ]);
             // Update our local index so we don't send this back as a server-win
@@ -96,6 +100,8 @@ try {
                 'repetitions' => $clientCard['repetitions'],
                 'due_date' => $clientCard['dueDate'],
                 'last_review' => $clientLastReview,
+                'times_shown' => $clientCard['timesShown'] ?? 0,
+                'last_rating' => $clientCard['lastRating'] ?? 0,
                 'updated_at' => $clientLastReview
             ];
         }
@@ -114,7 +120,9 @@ try {
                 'easeFactor' => floatval($row['ease_factor']),
                 'repetitions' => intval($row['repetitions']),
                 'dueDate' => intval($row['due_date']),
-                'lastReview' => intval($row['last_review'])
+                'lastReview' => intval($row['last_review']),
+                'timesShown' => intval($row['times_shown']),
+                'lastRating' => intval($row['last_rating'])
             ];
         }
     }

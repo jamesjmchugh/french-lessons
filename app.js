@@ -260,7 +260,9 @@ class FlashcardApp {
         const intervalMs = interval * 60 * 1000; // Convert minutes to ms
         const dueDate = Date.now() + intervalMs;
 
-        return { interval, easeFactor, repetitions, dueDate, lastReview: Date.now() };
+        const timesShown = (card.timesShown || 0) + 1;
+
+        return { interval, easeFactor, repetitions, dueDate, lastReview: Date.now(), timesShown, lastRating: rating };
     }
 
     // Rate the current card
@@ -957,7 +959,9 @@ class FlashcardApp {
             easeFactor: card.easeFactor,
             repetitions: card.repetitions,
             dueDate: card.dueDate,
-            lastReview: card.lastReview
+            lastReview: card.lastReview,
+            timesShown: card.timesShown || 0,
+            lastRating: card.lastRating || 0
         };
 
         try {
